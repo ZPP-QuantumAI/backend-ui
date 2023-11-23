@@ -6,7 +6,6 @@ plugins {
 }
 
 group = 'pl.mimuw.zpp.quantumai'
-version = '0.0.1-SNAPSHOT'
 
 java {
     sourceCompatibility = '21'
@@ -51,4 +50,8 @@ tasks.named('bootBuildImage') {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+jar {
+    enabled = false
 }

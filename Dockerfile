@@ -24,7 +24,7 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # Copy the built JAR file from the builder stage
-COPY --from=builder /app/build/libs/backend-ui-0.0.1-SNAPSHOT.jar ./your-app.jar
+COPY --from=builder /app/build/libs/backend-ui*.jar ./your-app.jar
 
 # Install Python 3 and pip
 RUN apt update && \
