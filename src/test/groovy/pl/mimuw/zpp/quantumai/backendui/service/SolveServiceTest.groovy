@@ -3,6 +3,7 @@ package pl.mimuw.zpp.quantumai.backendui.service
 import org.springframework.http.ResponseEntity
 import pl.mimuw.zpp.quantumai.backendui.feign.UtmPythonFeignClient
 import pl.mimuw.zpp.quantumai.backendui.model.EuclideanGraph
+import pl.mimuw.zpp.quantumai.backendui.model.TspResult
 import pl.mimuw.zpp.quantumai.backendui.repository.EuclideanGraphRepository
 import spock.lang.Specification
 
@@ -142,7 +143,10 @@ class SolveServiceTest extends Specification {
 
         then:
         result.isRight()
-        result.get() == valueOf(1.25).sqrt(MathContext.DECIMAL64).multiply(valueOf(2)).add(valueOf(0.5).sqrt(MathContext.DECIMAL64))
+        result.get() == TspResult.builder()
+            .sumOfWeights(valueOf(1.25).sqrt(MathContext.DECIMAL64).multiply(valueOf(2)).add(valueOf(0.5).sqrt(MathContext.DECIMAL64)))
+            .permutation([0, 1, 2, 0])
+            .build()
     }
 
     private def sampleGraphName() {
