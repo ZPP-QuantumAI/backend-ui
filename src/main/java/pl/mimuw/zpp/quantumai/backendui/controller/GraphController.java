@@ -15,7 +15,7 @@ public class GraphController {
     private final EuclideanGraphRepository euclideanGraphRepository;
 
     @PostMapping("/")
-    public ResponseEntity<Void> createGraph(@RequestParam EuclideanGraph graph) {
+    public ResponseEntity<Void> createGraph(@RequestBody EuclideanGraph graph) {
         euclideanGraphRepository.save(graph);
         return ResponseEntity.ok(null);
     }

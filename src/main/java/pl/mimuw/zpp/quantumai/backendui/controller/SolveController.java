@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.mimuw.zpp.quantumai.backendui.model.TspResult;
 import pl.mimuw.zpp.quantumai.backendui.service.SolveService;
 
@@ -20,8 +17,8 @@ public class SolveController {
 
     @PostMapping("/tsp")
     public ResponseEntity<String> solveTsp(
-            @RequestParam String pythonCode,
-            @RequestParam String graphName
+            @RequestBody String pythonCode,
+            @RequestBody String graphName
     ) throws Exception {
         Either<String, TspResult> result = solveService.solveTsp(pythonCode, graphName);
         if (result.isRight()) {
