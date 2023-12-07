@@ -17,14 +17,18 @@ public class SolveController {
 
     @PostMapping("/tsp")
     public ResponseEntity<String> solveTsp(
-            @RequestBody String pythonCode,
-            @RequestBody String graphName
+            @RequestBody SolveInput solveInput
     ) throws Exception {
-        Either<String, TspResult> result = solveService.solveTsp(pythonCode, graphName);
+        Either<String, TspResult> result = solveService.solveTsp(solveInput.pythonCode(), solveInput.graphName());
         if (result.isRight()) {
             return ResponseEntity.ok(mapper.writeValueAsString(result.get()));
         } else {
             return ResponseEntity.badRequest().body(result.getLeft());
         }
     }
+
+    record SolveInput(
+       String pythonCode,
+       String graphName
+    ) {}
 }
