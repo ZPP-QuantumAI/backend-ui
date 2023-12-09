@@ -5,3 +5,4 @@ on:
 jobs:
   build:
     uses: ZPP-QuantumAi/DevOps/.github/workflows/main.yml@main
+    secrets: inherit
