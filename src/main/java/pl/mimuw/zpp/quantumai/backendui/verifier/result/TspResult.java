@@ -1,4 +1,4 @@
-package pl.mimuw.zpp.quantumai.backendui.model;
+package pl.mimuw.zpp.quantumai.backendui.verifier.result;
 
 import lombok.Builder;
 
