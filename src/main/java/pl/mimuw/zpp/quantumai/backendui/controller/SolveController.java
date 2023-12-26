@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.mimuw.zpp.quantumai.backendui.model.TspResult;
 import pl.mimuw.zpp.quantumai.backendui.service.SolveService;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/solve")
