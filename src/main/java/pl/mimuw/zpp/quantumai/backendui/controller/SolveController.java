@@ -32,12 +32,13 @@ public class SolveController {
     }
 
     // Similar to the above, but the input is a file
-    @PostMapping("/tsp/file")
+    @PostMapping(value = "/tsp/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> solveTspWithFile(
-            @ModelAttribute SolveInputFile solveInputFile
+        @RequestPart("pythonFile") MultipartFile pythonFile,
+        @RequestPart("graphName") String graphName
     ) throws Exception {
-        String pythonCode = new String(solveInputFile.pythonFile().getBytes(), StandardCharsets.UTF_8);
-        Either<String, TspResult> result = solveService.solveTsp(pythonCode, solveInputFile.graphName());
+        String pythonCode = new String(pythonFile.getBytes(), StandardCharsets.UTF_8);
+        Either<String, TspResult> result = solveService.solveTsp(pythonCode, graphName);
         if (result.isRight()) {
             return ResponseEntity.ok(mapper.writeValueAsString(result.get()));
         } else {
@@ -48,11 +49,6 @@ public class SolveController {
     record SolveInput(
        String pythonCode,
        String graphName
-    ) {}
-
-    record SolveInputFile(
-        MultipartFile pythonFile,
-        String graphName
     ) {}
 
 }
