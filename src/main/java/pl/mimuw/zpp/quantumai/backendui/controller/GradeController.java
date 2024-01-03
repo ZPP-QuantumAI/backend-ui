@@ -8,6 +8,8 @@ import pl.mimuw.zpp.quantumai.backendui.model.Grade;
 import pl.mimuw.zpp.quantumai.backendui.model.Problem;
 import pl.mimuw.zpp.quantumai.backendui.service.GradeService;
 
+import java.io.IOException;
+
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
@@ -22,7 +24,7 @@ public class GradeController {
             @RequestParam String graphId,
             @RequestParam Problem problem,
             @RequestPart MultipartFile solution
-    ) {
+    ) throws IOException {
         return ResponseEntity.ok(
                 gradeService.generateGradeRequest(graphId, problem, solution)
         );

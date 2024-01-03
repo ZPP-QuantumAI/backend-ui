@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record GradeRequest(
         String gradeId,
-        String graphId
+        String graphId,
+        String filePath
 ) {
 }

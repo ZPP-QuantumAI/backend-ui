@@ -7,8 +7,10 @@ import org.springframework.web.multipart.MultipartFile;
 import pl.mimuw.zpp.quantumai.backendui.model.*;
 import pl.mimuw.zpp.quantumai.backendui.mq.GradeRequestProducer;
 import pl.mimuw.zpp.quantumai.backendui.repository.GradeRepository;
+import pl.mimuw.zpp.quantumai.backendui.storage.Storage;
 import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.*;
@@ -17,7 +19,7 @@ import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.*;
 @RequiredArgsConstructor
 public class GradeService {
     private final RandomNameGenerator randomNameGenerator;
-    private final StorageService storageService;
+    private final Storage storage;
     private final GradeRepository gradeRepository;
     private final GradeRequestProducer gradeRequestProducer;
     private final VerificationService verificationService;
@@ -27,9 +29,9 @@ public class GradeService {
             String graphId,
             Problem problem,
             MultipartFile solution
-    ) {
+    ) throws IOException {
         String gradeId = randomNameGenerator.generateName();
-        storageService.save(solution, gradeId);
+        String filePath = storage.save(solution, gradeId);
         gradeRepository.save(
                 Grade.builder()
                             .gradeId(gradeId)
@@ -42,6 +44,7 @@ public class GradeService {
                 GradeRequest.builder()
                             .gradeId(gradeId)
                             .graphId(graphId)
+                            .filePath(filePath)
                             .build()
         );
         return gradeId;
@@ -49,6 +52,11 @@ public class GradeService {
 
     public void handleRunResult(RunResult runResult) {
         Grade grade = gradeRepository.findById(runResult.gradeId()).orElseThrow(RuntimeException::new);
+
+        if (!runResult.success()) {
+            gradeRepository.save(grade.withStatus(FAILED));
+            return;
+        }
 
         Either<String, Object> verificationResult =
                 euclideanGraphService.getGraph(grade.graphId())
@@ -59,7 +67,7 @@ public class GradeService {
         gradeRepository.save(
                 verificationResult.isRight()
                     ? grade.withStatus(SUCCESS)
-                        .withRuntimeInMs(grade.runtimeInMs())
+                        .withRuntimeInMs(runResult.runtimeInMs())
                         .withResult(verificationResult.get())
                     : grade.withStatus(FAILED)
                         .withResult(verificationResult.getLeft())
