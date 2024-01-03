@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.mimuw.zpp.quantumai.backendui.model.EuclideanGraph;
-import pl.mimuw.zpp.quantumai.backendui.repository.EuclideanGraphRepository;
+import pl.mimuw.zpp.quantumai.backendui.service.EuclideanGraphService;
 
 import java.util.List;
 
@@ -12,18 +12,19 @@ import java.util.List;
 @RequestMapping("/graph")
 @RequiredArgsConstructor
 public class GraphController {
-    private final EuclideanGraphRepository euclideanGraphRepository;
+    private final EuclideanGraphService euclideanGraphService;
 
     @PostMapping("/")
-    public ResponseEntity<Void> createGraph(@RequestBody EuclideanGraph graph) {
-        euclideanGraphRepository.save(graph);
-        return ResponseEntity.ok(null);
+    public ResponseEntity<String> createGraph(@RequestBody EuclideanGraph graph) {
+        return ResponseEntity.ok(
+                euclideanGraphService.createGraph(graph)
+        );
     }
 
     @GetMapping("/")
     public ResponseEntity<List<EuclideanGraph>> getGraphs() {
         return ResponseEntity.ok(
-                euclideanGraphRepository.findAll()
+                euclideanGraphService.getGraphs()
         );
     }
 }
