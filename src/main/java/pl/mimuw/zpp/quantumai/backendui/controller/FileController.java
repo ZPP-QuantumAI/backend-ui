@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import pl.mimuw.zpp.quantumai.backendui.model.SolutionFile;
 import pl.mimuw.zpp.quantumai.backendui.service.FileService;
 
@@ -21,7 +22,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 public class FileController {
     private final FileService fileService;
 
-    @PostMapping("/")
+    @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> createFile(@RequestBody MultipartFile file) {
         try {
             String fileId = fileService.createFileFromMultipartFile(file);
