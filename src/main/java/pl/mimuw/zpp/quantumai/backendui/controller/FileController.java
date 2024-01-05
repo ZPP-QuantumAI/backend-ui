@@ -33,12 +33,20 @@ public class FileController {
     }
 
     @GetMapping("/")
-public ResponseEntity<SolutionFile> getFile(@RequestBody String id) {
-    Optional<SolutionFile> optionalFile = fileService.getFile(id);
-    if (optionalFile.isPresent()) {
-        return ResponseEntity.ok(optionalFile.get());
-    } else {
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<SolutionFile> getFile(@RequestBody String id) {
+        Optional<SolutionFile> optionalFile = fileService.getFile(id);
+        if (optionalFile.isPresent()) {
+            return ResponseEntity.ok(optionalFile.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
-}
+
+    @GetMapping("/all")
+    public ResponseEntity<List<SolutionFile>> getFiles() {
+        return ResponseEntity.ok(
+                fileService.getFiles()
+        );
+    }
+    
 }
