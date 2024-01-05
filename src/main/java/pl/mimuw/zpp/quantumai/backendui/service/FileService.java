@@ -25,8 +25,11 @@ public class FileService {
 
     public String createFileFromMultipartFile(MultipartFile file) throws IOException{
         String id = randomNameGenerator.generateName();
-        SolutionFile solutionFile = new SolutionFile(id, file.getBytes()).withId(id);
-        fileRepository.save(solutionFile);
+        fileRepository.save(
+                SolutionFile.builder()
+                                    .id(id)
+                                    .data(file.getBytes())
+                                    .build());
         return id;
     }
 
