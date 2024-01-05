@@ -21,10 +21,17 @@ public class GraphController {
         );
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public ResponseEntity<List<EuclideanGraph>> getGraphs() {
         return ResponseEntity.ok(
                 euclideanGraphService.getGraphs()
         );
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<EuclideanGraph> getGraph(@RequestBody String graphId) {
+        return euclideanGraphService.getGraph(graphId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
