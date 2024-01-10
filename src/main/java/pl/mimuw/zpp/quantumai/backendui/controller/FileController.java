@@ -29,7 +29,7 @@ public class FileController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<SolutionFile> getFile(@RequestBody String id) {
+    public ResponseEntity<SolutionFile> getFile(@RequestParam String id) {
         return fileService.getFile(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
