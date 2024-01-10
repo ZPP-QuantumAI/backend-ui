@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import org.bson.types.Binary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.mimuw.zpp.quantumai.backendui.model.SolutionFile;
@@ -28,7 +29,7 @@ public class FileService {
         fileRepository.save(
                 SolutionFile.builder()
                                     .id(id)
-                                    .data(file.getBytes())
+                                    .data(new Binary(file.getBytes()))
                                     .build());
         return id;
     }

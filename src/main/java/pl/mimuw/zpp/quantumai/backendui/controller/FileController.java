@@ -23,23 +23,16 @@ public class FileController {
     private final FileService fileService;
 
     @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> createFile(@RequestBody MultipartFile file) {
-        try {
-            String fileId = fileService.createFileFromMultipartFile(file);
-            return ResponseEntity.ok(fileId);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cannot convert MultiPartFile to byte[]");
-        }
+    public ResponseEntity<String> createFile(@RequestBody MultipartFile file) throws IOException {
+        String fileId = fileService.createFileFromMultipartFile(file);
+        return ResponseEntity.ok(fileId);
     }
 
     @GetMapping("/")
     public ResponseEntity<SolutionFile> getFile(@RequestBody String id) {
-        Optional<SolutionFile> optionalFile = fileService.getFile(id);
-        if (optionalFile.isPresent()) {
-            return ResponseEntity.ok(optionalFile.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return fileService.getFile(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/all")
