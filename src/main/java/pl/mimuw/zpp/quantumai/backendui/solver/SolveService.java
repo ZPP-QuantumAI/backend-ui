@@ -36,11 +36,17 @@ public class SolveService {
     }
 
     private void handleGradeRequest(GradeRequest request) {
+        request.requests().forEach(
+                singleRequest -> handleSingleRequest(singleRequest, request.solutionId())
+        );
+    }
+
+    private void handleSingleRequest(GradeRequest.SingleRequest request, String filePath) {
         try {
             EuclideanGraph graph = getGraph(request.graphId());
             String inputAsString = graphToInput(graph);
             File input = inputFromString(inputAsString);
-            File zippedProgram = storage.get(request.filePath());
+            File zippedProgram = storage.get(filePath);
             Path unzippedProgramPath = unzipProgram(zippedProgram);
             RunResult result = run(unzippedProgramPath, input);
             runResultQueue.offer(result.withGradeId(request.gradeId()));

@@ -1,7 +1,6 @@
 package pl.mimuw.zpp.quantumai.backendui.model;
 
 import lombok.Builder;
-import lombok.ToString;
 import lombok.With;
 
 @Builder

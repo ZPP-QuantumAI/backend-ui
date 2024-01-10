@@ -2,10 +2,16 @@ package pl.mimuw.zpp.quantumai.backendui.model;
 
 import lombok.Builder;
 
+import java.util.List;
+
 @Builder
 public record GradeRequest(
-        String gradeId,
-        String graphId,
-        String filePath
+        List<SingleRequest> requests,
+        String solutionId
 ) {
+    @Builder
+    public record SingleRequest(
+        String gradeId,
+        String graphId
+    ) {}
 }

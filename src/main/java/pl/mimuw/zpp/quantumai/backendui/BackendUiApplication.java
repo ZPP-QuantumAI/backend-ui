@@ -1,6 +1,7 @@
 package pl.mimuw.zpp.quantumai.backendui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -12,6 +13,7 @@ import pl.mimuw.zpp.quantumai.backendui.model.Problem;
 import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
 import pl.mimuw.zpp.quantumai.backendui.verifier.Verifier;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,7 +31,9 @@ public class BackendUiApplication {
 
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper;
     }
 
     @Bean
@@ -51,5 +55,10 @@ public class BackendUiApplication {
     public Map<Problem, Verifier> verifierMap(List<Verifier> verifiers) {
         return verifiers.stream()
                 .collect(Collectors.toMap(Verifier::problem, Function.identity()));
+    }
+
+    @Bean
+    public Clock clock() {
+        return Clock.systemDefaultZone();
     }
 }
