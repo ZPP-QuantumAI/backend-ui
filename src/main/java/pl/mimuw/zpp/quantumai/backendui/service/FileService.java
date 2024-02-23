@@ -1,9 +1,5 @@
 package pl.mimuw.zpp.quantumai.backendui.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.bson.types.Binary;
 import org.springframework.stereotype.Service;
@@ -11,6 +7,10 @@ import org.springframework.web.multipart.MultipartFile;
 import pl.mimuw.zpp.quantumai.backendui.model.SolutionFile;
 import pl.mimuw.zpp.quantumai.backendui.repository.FileRepository;
 import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

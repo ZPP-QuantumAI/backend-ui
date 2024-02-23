@@ -13,7 +13,8 @@ import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
 import java.io.IOException;
 import java.util.Optional;
 
-import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.*;
+import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.FAILED;
+import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.SUCCESS;
 
 @Service
 @RequiredArgsConstructor

@@ -1,30 +1,29 @@
 package pl.mimuw.zpp.quantumai.backendui.mq;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import pl.mimuw.zpp.quantumai.backendui.model.RunResult;
 import pl.mimuw.zpp.quantumai.backendui.service.GradeService;
-
-import java.util.Optional;
-import java.util.Queue;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class RunResultConsumer {
     private final GradeService gradeService;
-    private final Queue<RunResult> runResultQueue;
+    private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 10000L)
-    public void lookForNewMessage() {
-        Optional.ofNullable(runResultQueue.poll())
-                .ifPresent(this::handleRunResult);
-    }
-
-    private void handleRunResult(RunResult result) {
-        log.info("Got RunResult: {}", result.toString());
-        gradeService.handleRunResult(result);
+    @KafkaListener(groupId = "id", topics = "run-result")
+    public void listenToRunResult(String runResultAsJson) {
+        try {
+            RunResult runResult = objectMapper.readValue(runResultAsJson, RunResult.class);
+            log.info("Got RunResult: {}", runResult.toString());
+            gradeService.handleRunResult(runResult);
+        } catch (JsonProcessingException e) {
+            log.error("Error when parsing json", e);
+        }
     }
 }
