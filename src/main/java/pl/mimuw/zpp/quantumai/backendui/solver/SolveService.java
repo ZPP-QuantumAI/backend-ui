@@ -1,8 +1,11 @@
 package pl.mimuw.zpp.quantumai.backendui.solver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import pl.mimuw.zpp.quantumai.backendui.model.EuclideanGraph;
 import pl.mimuw.zpp.quantumai.backendui.model.GradeRequest;
@@ -17,8 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
-import java.util.Queue;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +27,17 @@ import java.util.Queue;
 public class SolveService {
     private final EuclideanGraphService euclideanGraphService;
     private final Storage storage;
-    private final Queue<GradeRequest> gradeRequestQueue;
-    private final Queue<RunResult> runResultQueue;
+    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Scheduled(fixedDelay = 10000L)
-    public void lookForNewGradeRequest() {
-        Optional.ofNullable(gradeRequestQueue.poll())
-                .ifPresent(this::handleGradeRequest);
+    @KafkaListener(groupId = "id", topics = "grade-request")
+    public void lookForNewGradeRequest(String gradeRequestAsJson) {
+        try {
+            GradeRequest request = objectMapper.readValue(gradeRequestAsJson, GradeRequest.class);
+            handleGradeRequest(request);
+        } catch (JsonProcessingException e) {
+            log.error("Error while parsing json", e);
+        }
     }
 
     private void handleGradeRequest(GradeRequest request) {
@@ -49,14 +54,20 @@ public class SolveService {
             File zippedProgram = storage.get(filePath);
             Path unzippedProgramPath = unzipProgram(zippedProgram);
             RunResult result = run(unzippedProgramPath, input);
-            runResultQueue.offer(result.withGradeId(request.gradeId()));
+            String message = objectMapper.writeValueAsString(result.withGradeId(request.gradeId()));
+            kafkaTemplate.send("run-result", message);
         } catch (Exception e) {
-            runResultQueue.offer(
-                    RunResult.builder()
-                            .gradeId(request.gradeId())
-                            .success(false)
-                            .build()
-            );
+            try {
+                String errorMessage = objectMapper.writeValueAsString(
+                        RunResult.builder()
+                                .gradeId(request.gradeId())
+                                .success(false)
+                                .build()
+                );
+                kafkaTemplate.send("run-result", errorMessage);
+            } catch (JsonProcessingException ex) {
+                log.error("Error while processing json", ex);
+            }
         }
     }
 
