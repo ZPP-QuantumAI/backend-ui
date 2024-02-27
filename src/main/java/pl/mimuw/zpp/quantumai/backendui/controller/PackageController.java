@@ -3,7 +3,9 @@ package pl.mimuw.zpp.quantumai.backendui.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.mimuw.zpp.quantumai.backendui.model.GraphPackage;
+import pl.mimuw.zpp.quantumai.backendui.controller.dto.GraphPackageDto;
+import pl.mimuw.zpp.quantumai.backendui.error.PackageNotFoundException;
+import pl.mimuw.zpp.quantumai.backendui.model.EuclideanGraph;
 import pl.mimuw.zpp.quantumai.backendui.service.PackageService;
 
 import java.util.List;
@@ -14,36 +16,35 @@ import java.util.List;
 public class PackageController {
     private final PackageService packageService;
 
-    @PostMapping("/new")
-    public ResponseEntity<String> createNewPackage(
-            @RequestParam String name
+    @PostMapping("/create")
+    public ResponseEntity<String> createPackage(
+        @RequestBody PackageCreateRequest packageCreateRequest
     ) {
-        return ResponseEntity.ok(
-                packageService.createEmptyPackage(name)
+        String id = packageService.createPackage(
+                packageCreateRequest.name(),
+                packageCreateRequest.graphs()
         );
+        return ResponseEntity.ok(id);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<GraphPackage>> getPackages() {
+    public ResponseEntity<List<GraphPackageDto>> getPackages() {
         return ResponseEntity.ok(
-                packageService.getPackages()
+                packageService.getAllPackageDtos()
         );
     }
 
     @GetMapping("/")
-    public ResponseEntity<GraphPackage> getPackage(
+    public ResponseEntity<GraphPackageDto> getPackage(
             @RequestParam String packageId
     ) {
         return ResponseEntity.ok(
-                packageService.getPackage(packageId)
+                packageService.getGraphPackageDto(packageId).orElseThrow(() -> new PackageNotFoundException(packageId))
         );
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<Void> getPackage(
-            @RequestParam String packageId,
-            @RequestBody List<String> graphIds) {
-        packageService.addGraphsToPackage(packageId, graphIds);
-        return ResponseEntity.ok(null);
-    }
+    private record PackageCreateRequest(
+        String name,
+        List<EuclideanGraph> graphs
+    ) {}
 }

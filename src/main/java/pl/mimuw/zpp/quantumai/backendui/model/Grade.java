@@ -12,7 +12,7 @@ import java.time.Instant;
 @With
 public record Grade(
     @Id String gradeId,
-    GradeStatus status,
+    Status status,
     String graphId,
     String solutionId,
     Problem problem,
@@ -20,9 +20,4 @@ public record Grade(
     Instant timestamp,
     Object result
 ) {
-    public enum GradeStatus {
-        WAITING,
-        SUCCESS,
-        FAILED
-    }
 }

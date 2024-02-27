@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import pl.mimuw.zpp.quantumai.backendui.controller.dto.PackageGradeDto;
 import pl.mimuw.zpp.quantumai.backendui.model.Grade;
 import pl.mimuw.zpp.quantumai.backendui.model.Problem;
 import pl.mimuw.zpp.quantumai.backendui.service.GradeService;
+import pl.mimuw.zpp.quantumai.backendui.service.SolutionService;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,6 +21,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 @RequiredArgsConstructor
 public class GradeController {
     private final GradeService gradeService;
+    private final SolutionService solutionService;
 
     @Deprecated
     @PostMapping(value = "/graph", consumes = {MULTIPART_FORM_DATA_VALUE, TEXT_PLAIN_VALUE})
@@ -56,11 +59,11 @@ public class GradeController {
     }
 
     @GetMapping(value = "/package")
-    public ResponseEntity<List<Grade>> getGradesFromPackage(
+    public ResponseEntity<PackageGradeDto> getGradesFromPackage(
             @RequestParam String solutionId
     ) {
         return ResponseEntity.ok(
-                gradeService.getGradesFromPackage(solutionId)
+                solutionService.getPackageGradeDto(solutionId)
         );
     }
 }

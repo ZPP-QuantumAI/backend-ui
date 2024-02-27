@@ -9,6 +9,7 @@ import pl.mimuw.zpp.quantumai.backendui.model.*;
 import pl.mimuw.zpp.quantumai.backendui.mq.GradeRequestProducer;
 import pl.mimuw.zpp.quantumai.backendui.repository.GradeRepository;
 import pl.mimuw.zpp.quantumai.backendui.repository.GraphPackageRepository;
+import pl.mimuw.zpp.quantumai.backendui.repository.SolutionRepository;
 import pl.mimuw.zpp.quantumai.backendui.storage.Storage;
 import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
 
@@ -20,8 +21,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.FAILED;
-import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.SUCCESS;
+import static pl.mimuw.zpp.quantumai.backendui.model.Status.FAILED;
+import static pl.mimuw.zpp.quantumai.backendui.model.Status.SUCCESS;
+
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class GradeService {
     private final VerificationService verificationService;
     private final EuclideanGraphService euclideanGraphService;
     private final GraphPackageRepository graphPackageRepository;
+    private final SolutionRepository solutionRepository;
     private final Clock clock;
 
     public String generateGradeRequestForGraph(
@@ -43,6 +46,13 @@ public class GradeService {
         String gradeId = randomNameGenerator.generateName();
         String filePath = storage.save(solution, gradeId);
         String solutionId = randomNameGenerator.generateName();
+        solutionRepository.save(
+                Solution.builder()
+                        .solutionId(solutionId)
+                        .solutionType(Solution.SolutionType.GRAPH)
+                        .resourceId(graphId)
+                        .build()
+        );
         saveWaitingGradeInDb(gradeId, graphId, solutionId, problem);
         gradeRequestProducer.generateGradeRequest(
                 GradeRequest.builder()
@@ -67,6 +77,13 @@ public class GradeService {
         GraphPackage graphPackage = graphPackageRepository.findById(packageId).orElseThrow(RuntimeException::new);
         String filePath = storage.save(solution, null);
         String solutionId = randomNameGenerator.generateName();
+        solutionRepository.save(
+                Solution.builder()
+                        .solutionId(solutionId)
+                        .solutionType(Solution.SolutionType.PACKAGE)
+                        .resourceId(packageId)
+                        .build()
+        );
         List<GraphGrade> graphGrades = graphPackage.graphIds().stream()
                 .map(graphId -> GraphGrade.builder()
                         .graphId(graphId)
@@ -152,7 +169,7 @@ public class GradeService {
                         .graphId(graphId)
                         .solutionId(solutionId)
                         .problem(problem)
-                        .status(Grade.GradeStatus.WAITING)
+                        .status(Status.WAITING)
                         .build()
         );
     }
