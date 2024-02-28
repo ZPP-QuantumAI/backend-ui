@@ -3,9 +3,8 @@ package pl.mimuw.zpp.quantumai.backendui.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.mimuw.zpp.quantumai.backendui.controller.dto.GraphPackageDto;
 import pl.mimuw.zpp.quantumai.backendui.error.PackageNotFoundException;
-import pl.mimuw.zpp.quantumai.backendui.model.EuclideanGraph;
+import pl.mimuw.zpp.quantumai.backendui.model.GraphPackage;
 import pl.mimuw.zpp.quantumai.backendui.service.PackageService;
 
 import java.util.List;
@@ -18,33 +17,25 @@ public class PackageController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createPackage(
-        @RequestBody PackageCreateRequest packageCreateRequest
+        @RequestBody GraphPackage graphPackage
     ) {
-        String id = packageService.createPackage(
-                packageCreateRequest.name(),
-                packageCreateRequest.graphs()
-        );
+        String id = packageService.createPackage(graphPackage);
         return ResponseEntity.ok(id);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<GraphPackageDto>> getPackages() {
+    public ResponseEntity<List<GraphPackage>> getPackages() {
         return ResponseEntity.ok(
-                packageService.getAllPackageDtos()
+                packageService.getPackages()
         );
     }
 
     @GetMapping("/")
-    public ResponseEntity<GraphPackageDto> getPackage(
+    public ResponseEntity<GraphPackage> getPackage(
             @RequestParam String packageId
     ) {
         return ResponseEntity.ok(
-                packageService.getGraphPackageDto(packageId).orElseThrow(() -> new PackageNotFoundException(packageId))
+                packageService.getGraphPackage(packageId).orElseThrow(() -> new PackageNotFoundException(packageId))
         );
     }
-
-    private record PackageCreateRequest(
-        String name,
-        List<EuclideanGraph> graphs
-    ) {}
 }
