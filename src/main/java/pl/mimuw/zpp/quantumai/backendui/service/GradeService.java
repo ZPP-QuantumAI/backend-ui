@@ -4,7 +4,6 @@ import io.vavr.control.Either;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import pl.mimuw.zpp.quantumai.backendui.controller.dto.PackageGradeRequestDto;
 import pl.mimuw.zpp.quantumai.backendui.model.*;
 import pl.mimuw.zpp.quantumai.backendui.mq.GradeRequestProducer;

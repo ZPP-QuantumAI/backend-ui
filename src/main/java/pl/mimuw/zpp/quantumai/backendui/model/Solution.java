@@ -11,7 +11,6 @@ public record Solution(
         String name
 ) {
     public enum SolutionType {
-        GRAPH,
         PACKAGE
     }
 }
