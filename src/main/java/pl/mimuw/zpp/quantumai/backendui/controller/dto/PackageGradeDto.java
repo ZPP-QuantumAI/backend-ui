@@ -12,7 +12,14 @@ public record PackageGradeDto(
         String solutionId,
         GraphPackage graphPackage,
         Status status,
-        List<Grade> grades
+        Long runtimeInMs,
+        String algorithmName,
+        FinalGrade finalGrade
 
 ) {
+    @Builder
+    public record FinalGrade(
+        Object finalGrade,
+        List<Grade> grades
+    ) {}
 }

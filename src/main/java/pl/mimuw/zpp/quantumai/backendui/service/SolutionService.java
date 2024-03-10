@@ -20,6 +20,7 @@ public class SolutionService {
     private final SolutionRepository solutionRepository;
     private final PackageService packageService;
     private final GradeService gradeService;
+    private final FinalGradeService finalGradeService;
 
     public PackageGradeDto getPackageGradeDto(String solutionId) {
         Solution solution = solutionRepository.findById(solutionId).orElseThrow(() -> new SolutionNotFoundException(solutionId));
@@ -33,11 +34,20 @@ public class SolutionService {
                         .map(Grade::status)
                         .toList()
         );
+        Long runtimeInMs = grades.stream()
+                .map(Grade::runtimeInMs)
+                .reduce(0L, Long::sum);
+        PackageGradeDto.FinalGrade finalGrade = PackageGradeDto.FinalGrade.builder()
+                .finalGrade(finalGradeService.finalGrade(grades))
+                .grades(grades)
+                .build();
         return PackageGradeDto.builder()
                 .solutionId(solutionId)
                 .graphPackage(graphPackage)
                 .status(status)
-                .grades(grades)
+                .runtimeInMs(runtimeInMs)
+                .finalGrade(finalGrade)
+                .algorithmName(solution.name())
                 .build();
     }
 }

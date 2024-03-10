@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import pl.mimuw.zpp.quantumai.backendui.controller.dto.PackageGradeRequestDto;
 import pl.mimuw.zpp.quantumai.backendui.model.*;
 import pl.mimuw.zpp.quantumai.backendui.mq.GradeRequestProducer;
 import pl.mimuw.zpp.quantumai.backendui.repository.GradeRepository;
@@ -70,18 +71,17 @@ public class GradeService {
     }
 
     public String generateGradeRequestForPackage(
-            String packageId,
-            Problem problem,
-            MultipartFile solution
+            PackageGradeRequestDto packageGradeRequestDto
     ) throws IOException {
-        GraphPackage graphPackage = graphPackageRepository.findById(packageId).orElseThrow(RuntimeException::new);
-        String filePath = storage.save(solution, null);
+        GraphPackage graphPackage = graphPackageRepository.findById(packageGradeRequestDto.packageId()).orElseThrow(RuntimeException::new);
+        String filePath = storage.save(packageGradeRequestDto.solution(), null);
         String solutionId = randomNameGenerator.generateName();
         solutionRepository.save(
                 Solution.builder()
                         .solutionId(solutionId)
                         .solutionType(Solution.SolutionType.PACKAGE)
-                        .resourceId(packageId)
+                        .resourceId(packageGradeRequestDto.packageId())
+                        .name(packageGradeRequestDto.name())
                         .build()
         );
         List<GraphGrade> graphGrades = graphPackage.graphIds().stream()
@@ -90,7 +90,7 @@ public class GradeService {
                         .gradeId(randomNameGenerator.generateName())
                         .build())
                 .toList();
-        graphGrades.forEach(graphGrade -> saveWaitingGradeInDb(graphGrade.gradeId, graphGrade.graphId, solutionId, problem));
+        graphGrades.forEach(graphGrade -> saveWaitingGradeInDb(graphGrade.gradeId, graphGrade.graphId, solutionId, packageGradeRequestDto.problem()));
         gradeRequestProducer.generateGradeRequest(
                 GradeRequest.builder()
                         .requests(

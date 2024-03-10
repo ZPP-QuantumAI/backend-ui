@@ -7,7 +7,8 @@ import org.springframework.data.annotation.Id;
 public record Solution(
         @Id String solutionId,
         SolutionType solutionType,
-        String resourceId
+        String resourceId,
+        String name
 ) {
     public enum SolutionType {
         GRAPH,

@@ -11,6 +11,7 @@ import java.util.List;
 public record GraphPackage(
         @Id String packageId,
         String name,
+        String description,
         List<String> graphIds
 ) {
 }

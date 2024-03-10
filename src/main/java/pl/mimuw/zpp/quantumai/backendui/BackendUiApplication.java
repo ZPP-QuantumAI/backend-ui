@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import pl.mimuw.zpp.quantumai.backendui.finalgrade.FinalGrader;
 import pl.mimuw.zpp.quantumai.backendui.model.Problem;
 import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
 import pl.mimuw.zpp.quantumai.backendui.verifier.Verifier;
@@ -55,6 +56,12 @@ public class BackendUiApplication {
     public Map<Problem, Verifier> verifierMap(List<Verifier> verifiers) {
         return verifiers.stream()
                 .collect(Collectors.toMap(Verifier::problem, Function.identity()));
+    }
+
+    @Bean
+    public Map<Problem, FinalGrader> finalGraderMap(List<FinalGrader> graders) {
+        return graders.stream()
+                .collect(Collectors.toMap(FinalGrader::problem, Function.identity()));
     }
 
     @Bean
