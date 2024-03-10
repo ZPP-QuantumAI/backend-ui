@@ -39,37 +39,6 @@ public class GradeService {
     private final SolutionRepository solutionRepository;
     private final Clock clock;
 
-    public String generateGradeRequestForGraph(
-            String graphId,
-            Problem problem,
-            MultipartFile solution
-    ) throws IOException {
-        String gradeId = randomNameGenerator.generateName();
-        String filePath = storage.save(solution, gradeId);
-        String solutionId = randomNameGenerator.generateName();
-        solutionRepository.save(
-                Solution.builder()
-                        .solutionId(solutionId)
-                        .solutionType(Solution.SolutionType.GRAPH)
-                        .resourceId(graphId)
-                        .build()
-        );
-        saveWaitingGradeInDb(gradeId, graphId, solutionId, problem);
-        gradeRequestProducer.generateGradeRequest(
-                GradeRequest.builder()
-                        .requests(
-                                List.of(
-                                        GradeRequest.SingleRequest.builder()
-                                                .gradeId(gradeId)
-                                                .graphId(graphId)
-                                                .build()
-                                ))
-                        .solutionId(filePath)
-                        .build()
-        );
-        return gradeId;
-    }
-
     public String generateGradeRequestForPackage(
             PackageGradeRequestDto packageGradeRequestDto
     ) throws IOException {
