@@ -41,7 +41,7 @@ public class SolutionService {
                         .reduce(0L, Long::sum)
                 : null;
         PackageGradeDto.FinalGrade finalGrade = PackageGradeDto.FinalGrade.builder()
-                .finalGrade(finalGradeService.finalGrade(grades))
+                .finalGrade(status.equals(Status.SUCCESS) ? finalGradeService.finalGrade(grades) : null)
                 .grades(grades)
                 .build();
         return PackageGradeDto.builder()
