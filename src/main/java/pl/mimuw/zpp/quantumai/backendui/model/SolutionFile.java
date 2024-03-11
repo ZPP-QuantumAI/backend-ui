@@ -8,6 +8,6 @@ import org.springframework.data.annotation.Id;
 @Builder
 @With
 public record SolutionFile(
-        @Id String id,
+        @Id String solutionId,
         Binary data
 ) {}

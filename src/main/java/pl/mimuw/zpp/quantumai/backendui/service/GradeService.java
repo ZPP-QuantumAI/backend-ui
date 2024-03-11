@@ -1,20 +1,29 @@
 package pl.mimuw.zpp.quantumai.backendui.service;
 
 import io.vavr.control.Either;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import pl.mimuw.zpp.quantumai.backendui.controller.dto.PackageGradeRequestDto;
 import pl.mimuw.zpp.quantumai.backendui.model.*;
 import pl.mimuw.zpp.quantumai.backendui.mq.GradeRequestProducer;
 import pl.mimuw.zpp.quantumai.backendui.repository.GradeRepository;
+import pl.mimuw.zpp.quantumai.backendui.repository.GraphPackageRepository;
+import pl.mimuw.zpp.quantumai.backendui.repository.SolutionRepository;
 import pl.mimuw.zpp.quantumai.backendui.storage.Storage;
 import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.FAILED;
-import static pl.mimuw.zpp.quantumai.backendui.model.Grade.GradeStatus.SUCCESS;
+import static pl.mimuw.zpp.quantumai.backendui.model.Status.FAILED;
+import static pl.mimuw.zpp.quantumai.backendui.model.Status.SUCCESS;
+
 
 @Service
 @RequiredArgsConstructor
@@ -25,30 +34,46 @@ public class GradeService {
     private final GradeRequestProducer gradeRequestProducer;
     private final VerificationService verificationService;
     private final EuclideanGraphService euclideanGraphService;
+    private final GraphPackageRepository graphPackageRepository;
+    private final SolutionRepository solutionRepository;
+    private final Clock clock;
 
-    public String generateGradeRequest(
-            String graphId,
-            Problem problem,
-            MultipartFile solution
+    public String generateGradeRequestForPackage(
+            PackageGradeRequestDto packageGradeRequestDto
     ) throws IOException {
-        String gradeId = randomNameGenerator.generateName();
-        String filePath = storage.save(solution, gradeId);
-        gradeRepository.save(
-                Grade.builder()
-                            .gradeId(gradeId)
-                            .graphId(graphId)
-                            .problem(problem)
-                            .status(Grade.GradeStatus.WAITING)
-                            .build()
+        GraphPackage graphPackage = graphPackageRepository.findById(packageGradeRequestDto.packageId()).orElseThrow(RuntimeException::new);
+        String filePath = storage.save(packageGradeRequestDto.solution(), null);
+        String solutionId = randomNameGenerator.generateName();
+        solutionRepository.save(
+                Solution.builder()
+                        .solutionId(solutionId)
+                        .solutionType(Solution.SolutionType.PACKAGE)
+                        .resourceId(packageGradeRequestDto.packageId())
+                        .name(packageGradeRequestDto.name())
+                        .build()
         );
+        List<GraphGrade> graphGrades = graphPackage.graphIds().stream()
+                .map(graphId -> GraphGrade.builder()
+                        .graphId(graphId)
+                        .gradeId(randomNameGenerator.generateName())
+                        .build())
+                .toList();
+        graphGrades.forEach(graphGrade -> saveWaitingGradeInDb(graphGrade.gradeId, graphGrade.graphId, solutionId, packageGradeRequestDto.problem()));
         gradeRequestProducer.generateGradeRequest(
                 GradeRequest.builder()
-                            .gradeId(gradeId)
-                            .graphId(graphId)
-                            .filePath(filePath)
-                            .build()
+                        .requests(
+                                graphGrades.stream()
+                                        .map(graphGrade ->
+                                                GradeRequest.SingleRequest.builder()
+                                                        .gradeId(graphGrade.gradeId)
+                                                        .graphId(graphGrade.graphId)
+                                                        .build())
+                                        .toList()
+                        )
+                        .solutionId(filePath)
+                        .build()
         );
-        return gradeId;
+        return solutionId;
     }
 
     public void handleRunResult(RunResult runResult) {
@@ -70,8 +95,10 @@ public class GradeService {
                     ? grade.withStatus(SUCCESS)
                         .withRuntimeInMs(runResult.runtimeInMs())
                         .withResult(verificationResult.get())
+                        .withTimestamp(clock.instant())
                     : grade.withStatus(FAILED)
                         .withResult(verificationResult.getLeft())
+                        .withTimestamp(clock.instant())
         );
     }
 
@@ -80,4 +107,44 @@ public class GradeService {
     ) {
         return gradeRepository.findById(gradeId);
     }
+
+    public List<Grade> getGrades() {
+        return gradeRepository.findAll();
+    }
+
+    public List<Grade> getGradesFromPackage(String solutionId) {
+        List<Grade> grades = gradeRepository.findBySolutionId(solutionId);
+        return getLatestForAllGraphs(grades);
+    }
+
+    private List<Grade> getLatestForAllGraphs(List<Grade> grades) {
+        Map<String, List<Grade>> gradesGroupedByGraphs = grades.stream().collect(Collectors.groupingBy(Grade::graphId));
+        return gradesGroupedByGraphs.values().stream()
+                .map(this::getLatest)
+                .toList();
+    }
+
+    private Grade getLatest(List<Grade> grades) {
+        return grades.stream()
+                .max(Comparator.comparing(Grade::timestamp))
+                .orElseThrow(RuntimeException::new);
+    }
+
+    private void saveWaitingGradeInDb(String gradeId, String graphId, String solutionId, Problem problem) {
+        gradeRepository.save(
+                Grade.builder()
+                        .gradeId(gradeId)
+                        .graphId(graphId)
+                        .solutionId(solutionId)
+                        .problem(problem)
+                        .status(Status.WAITING)
+                        .build()
+        );
+    }
+
+    @Builder
+    private record GraphGrade(
+            String graphId,
+            String gradeId
+    ) {}
 }

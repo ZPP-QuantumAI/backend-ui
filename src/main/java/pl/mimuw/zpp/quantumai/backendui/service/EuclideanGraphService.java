@@ -26,4 +26,8 @@ public class EuclideanGraphService {
     }
 
     public Optional<EuclideanGraph> getGraph(String graphId) { return euclideanGraphRepository.findById(graphId); }
+
+    public List<EuclideanGraph> getGraphs(List<String> graphIds) {
+        return euclideanGraphRepository.findAllById(graphIds);
+    }
 }

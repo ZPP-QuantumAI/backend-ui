@@ -29,7 +29,7 @@ public class GraphController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<EuclideanGraph> getGraph(@RequestBody String graphId) {
+    public ResponseEntity<EuclideanGraph> getGraph(@RequestParam String graphId) {
         return euclideanGraphService.getGraph(graphId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

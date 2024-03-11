@@ -20,7 +20,7 @@ public class FileService {
 
     public String createFile(SolutionFile file) {
         String id = randomNameGenerator.generateName();
-        fileRepository.save(file.withId(id));
+        fileRepository.save(file.withSolutionId(id));
         return id;
     }
 
@@ -28,7 +28,7 @@ public class FileService {
         String id = randomNameGenerator.generateName();
         fileRepository.save(
                 SolutionFile.builder()
-                                    .id(id)
+                                    .solutionId(id)
                                     .data(new Binary(file.getBytes()))
                                     .build());
         return id;
