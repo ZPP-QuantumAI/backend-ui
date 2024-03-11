@@ -34,9 +34,12 @@ public class SolutionService {
                         .map(Grade::status)
                         .toList()
         );
-        Long runtimeInMs = grades.stream()
-                .map(Grade::runtimeInMs)
-                .reduce(0L, Long::sum);
+        Long runtimeInMs =
+                status.equals(Status.SUCCESS)
+                ? grades.stream()
+                        .map(Grade::runtimeInMs)
+                        .reduce(0L, Long::sum)
+                : null;
         PackageGradeDto.FinalGrade finalGrade = PackageGradeDto.FinalGrade.builder()
                 .finalGrade(finalGradeService.finalGrade(grades))
                 .grades(grades)
