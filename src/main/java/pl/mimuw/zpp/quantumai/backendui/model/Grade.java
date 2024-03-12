@@ -14,6 +14,7 @@ public record Grade(
     @Id String gradeId,
     Status status,
     String graphId,
+    String graphName,
     String solutionId,
     Problem problem,
     Long runtimeInMs,

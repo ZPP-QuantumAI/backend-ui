@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static pl.mimuw.zpp.quantumai.backendui.model.Status.FAILED;
@@ -58,7 +59,8 @@ public class GradeService {
                         .gradeId(randomNameGenerator.generateName())
                         .build())
                 .toList();
-        graphGrades.forEach(graphGrade -> saveWaitingGradeInDb(graphGrade.gradeId, graphGrade.graphId, solutionId, packageGradeRequestDto.problem()));
+        Map<String, EuclideanGraph> graphMap = getGraphIdToGraphMap(graphPackage.graphIds());
+        graphGrades.forEach(graphGrade -> saveWaitingGradeInDb(graphGrade.gradeId, graphGrade.graphId, solutionId, packageGradeRequestDto.problem(), graphMap));
         gradeRequestProducer.generateGradeRequest(
                 GradeRequest.builder()
                         .requests(
@@ -130,16 +132,29 @@ public class GradeService {
                 .orElseThrow(RuntimeException::new);
     }
 
-    private void saveWaitingGradeInDb(String gradeId, String graphId, String solutionId, Problem problem) {
+    private void saveWaitingGradeInDb(String gradeId, String graphId, String solutionId, Problem problem, Map<String, EuclideanGraph> graphMap) {
         gradeRepository.save(
                 Grade.builder()
                         .gradeId(gradeId)
                         .graphId(graphId)
+                        .graphName(getGraphNameOrNull(graphMap, graphId))
                         .solutionId(solutionId)
                         .problem(problem)
                         .status(Status.WAITING)
                         .build()
         );
+    }
+
+    private Map<String, EuclideanGraph> getGraphIdToGraphMap(List<String> graphIds) {
+        return euclideanGraphService.getGraphs(graphIds)
+                .stream()
+                .collect(Collectors.toMap(EuclideanGraph::id, Function.identity()));
+    }
+
+    private String getGraphNameOrNull(Map<String, EuclideanGraph> graphMap, String graphId) {
+        return Optional.ofNullable(graphMap.get(graphId))
+                .map(EuclideanGraph::name)
+                .orElse(null);
     }
 
     @Builder

@@ -8,16 +8,8 @@ public enum Status {
     FAILED;
 
     public static Status statusFromMany(List<Status> statuses) {
-        for (Status status : statuses) {
-            switch (status) {
-                case WAITING -> {
-                    return WAITING;
-                }
-                case FAILED -> {
-                    return FAILED;
-                }
-            }
-        }
+        if (statuses.contains(WAITING)) return WAITING;
+        if (statuses.contains(FAILED)) return FAILED;
         return SUCCESS;
     }
 }
