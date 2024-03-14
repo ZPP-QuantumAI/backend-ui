@@ -43,7 +43,7 @@ public class GradeService {
             PackageGradeRequestDto packageGradeRequestDto
     ) throws IOException {
         GraphPackage graphPackage = graphPackageRepository.findById(packageGradeRequestDto.packageId()).orElseThrow(RuntimeException::new);
-        String filePath = storage.save(packageGradeRequestDto.solution(), null);
+        String filePath = storage.save(packageGradeRequestDto.solution());
         String solutionId = randomNameGenerator.generateName();
         solutionRepository.save(
                 Solution.builder()

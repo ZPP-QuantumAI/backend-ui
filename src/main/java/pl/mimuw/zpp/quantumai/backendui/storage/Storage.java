@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 public interface Storage {
-    String save(MultipartFile multipartFile, String path) throws IOException;
+    String save(MultipartFile multipartFile) throws IOException;
 
-    File get(String path);
+    File get(String id) throws IOException;
 }
