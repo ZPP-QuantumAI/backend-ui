@@ -77,7 +77,7 @@ public class SolveService {
     }
 
     private EuclideanGraph getGraph(String graphId) {
-        return euclideanGraphService.getGraph(graphId).orElseThrow(RuntimeException::new);
+        return euclideanGraphService.getGraphById(graphId).orElseThrow(RuntimeException::new);
     }
 
     private String graphToInput(EuclideanGraph graph) {

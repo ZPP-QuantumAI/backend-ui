@@ -21,13 +21,19 @@ public class EuclideanGraphService {
         return id;
     }
 
-    public List<EuclideanGraph> getGraphs() {
+    public void saveGraphWithId(EuclideanGraph graph) {
+        euclideanGraphRepository.save(graph);
+    }
+
+    public List<EuclideanGraph> getAllGraphs() {
         return euclideanGraphRepository.findAll();
     }
 
-    public Optional<EuclideanGraph> getGraph(String graphId) { return euclideanGraphRepository.findById(graphId); }
+    public Optional<EuclideanGraph> getGraphById(String graphId) {
+        return euclideanGraphRepository.findById(graphId);
+    }
 
-    public List<EuclideanGraph> getGraphs(List<String> graphIds) {
+    public List<EuclideanGraph> getGraphsByIdIn(List<String> graphIds) {
         return euclideanGraphRepository.findAllById(graphIds);
     }
 }

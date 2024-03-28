@@ -87,7 +87,7 @@ public class GradeService {
         }
 
         Either<String, Object> verificationResult =
-                euclideanGraphService.getGraph(grade.graphId())
+                euclideanGraphService.getGraphById(grade.graphId())
                         .<Either<String, EuclideanGraph>>map(Either::right)
                         .orElse(Either.left("no such graph in the db"))
                         .flatMap(graph -> verificationService.verify(graph, grade.problem(), runResult.output()));
@@ -146,7 +146,7 @@ public class GradeService {
     }
 
     private Map<String, EuclideanGraph> getGraphIdToGraphMap(List<String> graphIds) {
-        return euclideanGraphService.getGraphs(graphIds)
+        return euclideanGraphService.getGraphsByIdIn(graphIds)
                 .stream()
                 .collect(Collectors.toMap(EuclideanGraph::id, Function.identity()));
     }
