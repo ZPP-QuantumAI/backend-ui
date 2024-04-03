@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.mimuw.zpp.quantumai.backendui.controller.dto.MapGraphCreationRequestDto;
 import pl.mimuw.zpp.quantumai.backendui.model.EuclideanGraph;
+import pl.mimuw.zpp.quantumai.backendui.model.GraphType;
 import pl.mimuw.zpp.quantumai.backendui.model.MapGraph;
 import pl.mimuw.zpp.quantumai.backendui.repository.MapGraphRepository;
 import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
@@ -18,26 +19,32 @@ public class MapGraphService {
     private final MapGraphConversionService mapGraphConversionService;
     private final RandomNameGenerator randomNameGenerator;
     private final EuclideanGraphService euclideanGraphService;
+    private final GraphService graphService;
 
     public String createGraph(MapGraphCreationRequestDto request) {
         String id = randomNameGenerator.generateName();
 
-        List<MapGraph.Coordinates> coordinates = request.coordinatesInDecimal().stream()
-                .map(coordsInDecimal -> mapGraphConversionService.fromDecimal(coordsInDecimal.longitudeInDecimal(), coordsInDecimal.latitudeInDecimal()))
-                .toList();
-
         MapGraph mapGraph = MapGraph.builder()
                 .id(id)
                 .name(request.name())
-                .coordinates(coordinates)
+                .nodes(
+                        request.nodes().stream()
+                                .map(coordinatesInDecimal ->
+                                        MapGraph.Coordinates.builder()
+                                                .longitudeInDecimal(coordinatesInDecimal.longitudeInDecimal())
+                                                .latitudeInDecimal(coordinatesInDecimal.latitudeInDecimal())
+                                                .build())
+                                .toList()
+                )
                 .build();
 
-        MapGraph mapGraphWithCenterAndScale = mapGraphConversionService.setCenterAndScale(mapGraph);
+        MapGraph mapGraphWithCenter = mapGraphConversionService.setCenter(mapGraph);
 
-        EuclideanGraph euclideanGraph = mapGraphConversionService.fromMap(mapGraphWithCenterAndScale);
+        EuclideanGraph euclideanGraph = mapGraphConversionService.fromMap(mapGraphWithCenter);
 
-        mapGraphRepository.save(mapGraphWithCenterAndScale);
+        mapGraphRepository.save(mapGraphWithCenter);
         euclideanGraphService.saveGraphWithId(euclideanGraph);
+        graphService.createGraph(id, GraphType.MAP);
 
         return id;
     }
@@ -45,6 +52,8 @@ public class MapGraphService {
     public List<MapGraph> getAllGraphs() {
         return mapGraphRepository.findAll();
     }
+
+    public List<MapGraph> getAllGraphs(List<String> graphIds) { return mapGraphRepository.findAllById(graphIds); }
 
     public Optional<MapGraph> getGraphById(String graphId) {
         return mapGraphRepository.findById(graphId);

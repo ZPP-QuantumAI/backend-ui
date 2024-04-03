@@ -12,13 +12,12 @@ import java.util.List;
 public record MapGraph(
         @Id String id,
         String name,
-        List<Coordinates> coordinates,
-        Coordinates centerOfMap,
-        BigDecimal scale
+        List<Coordinates> nodes,
+        Coordinates centerOfMap
 ) {
     @Builder
     public record Coordinates(
-        BigDecimal longitudeInRadians,
-        BigDecimal latitudeInRadians
+        BigDecimal longitudeInDecimal,
+        BigDecimal latitudeInDecimal
     ) {}
 }

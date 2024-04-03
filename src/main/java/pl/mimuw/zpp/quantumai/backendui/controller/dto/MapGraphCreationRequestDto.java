@@ -5,7 +5,7 @@ import java.util.List;
 
 public record MapGraphCreationRequestDto(
         String name,
-        List<CoordinatesInDecimal> coordinatesInDecimal
+        List<CoordinatesInDecimal> nodes
 ) {
     public record CoordinatesInDecimal(
         BigDecimal longitudeInDecimal,

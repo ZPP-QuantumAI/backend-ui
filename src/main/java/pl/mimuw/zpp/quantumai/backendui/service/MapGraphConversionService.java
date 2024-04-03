@@ -18,36 +18,26 @@ public class MapGraphConversionService {
     private static final BigDecimal RADIUS_OF_GLOBE_IN_KM = BigDecimal.valueOf(6371.008);
     private static final BigDecimal ONE_DEGREE_IN_RADIANS = BigDecimal.valueOf(Math.PI).divide(BigDecimal.valueOf(180), MATH_CONTEXT);
 
-    public MapGraph.Coordinates fromDecimal(BigDecimal longitudeInDecimal, BigDecimal latitudeInDecimal) {
-        return MapGraph.Coordinates.builder()
-                .longitudeInRadians(longitudeInDecimal.multiply(ONE_DEGREE_IN_RADIANS))
-                .latitudeInRadians(latitudeInDecimal.multiply(ONE_DEGREE_IN_RADIANS))
-                .build();
-    }
+    public MapGraph setCenter(MapGraph mapGraph) {
+        BigDecimal numberOfCoords = BigDecimal.valueOf(mapGraph.nodes().size());
 
-    public MapGraph setCenterAndScale(MapGraph mapGraph) {
-        BigDecimal numberOfCoords = BigDecimal.valueOf(mapGraph.coordinates().size());
-
-        BigDecimal averageLongitude = mapGraph.coordinates().stream()
-                .map(MapGraph.Coordinates::longitudeInRadians)
+        BigDecimal averageLongitudeInDecimal = mapGraph.nodes().stream()
+                .map(MapGraph.Coordinates::longitudeInDecimal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .divide(numberOfCoords, MATH_CONTEXT);
 
-        BigDecimal averageLatitude = mapGraph.coordinates().stream()
-                .map(MapGraph.Coordinates::latitudeInRadians)
+        BigDecimal averageLatitudeInDecimal = mapGraph.nodes().stream()
+                .map(MapGraph.Coordinates::latitudeInDecimal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .divide(numberOfCoords, MATH_CONTEXT);
-
-        BigDecimal scale = BigDecimal.valueOf(Math.cos(averageLatitude.doubleValue()));
 
         return mapGraph
                 .withCenterOfMap(
                         MapGraph.Coordinates.builder()
-                                .longitudeInRadians(averageLongitude)
-                                .latitudeInRadians(averageLatitude)
+                                .longitudeInDecimal(averageLongitudeInDecimal)
+                                .latitudeInDecimal(averageLatitudeInDecimal)
                                 .build()
-                )
-                .withScale(scale);
+                );
     }
 
     public EuclideanGraph fromMap(MapGraph mapGraph) {
@@ -55,12 +45,14 @@ public class MapGraphConversionService {
             throw new RuntimeException("centerOfMap of map graph is required");
         }
 
-        if (Objects.isNull(mapGraph.scale())) {
-            throw new RuntimeException("scale of map is required");
-        }
+        BigDecimal averageLatitudeInDecimal = mapGraph.centerOfMap().latitudeInDecimal();
 
-        List<EuclideanGraph.Node> nodes = mapGraph.coordinates().stream()
-                .map(coords -> fromCoordinates(coords, mapGraph.centerOfMap(), mapGraph.scale()))
+        BigDecimal averageLatitudeInRadians = averageLatitudeInDecimal.multiply(ONE_DEGREE_IN_RADIANS);
+
+        BigDecimal scale = BigDecimal.valueOf(Math.cos(averageLatitudeInRadians.doubleValue()));
+
+        List<EuclideanGraph.Node> nodes = mapGraph.nodes().stream()
+                .map(coords -> fromCoordinates(coords, mapGraph.centerOfMap(), scale))
                 .toList();
 
         return EuclideanGraph.builder()
@@ -75,10 +67,14 @@ public class MapGraphConversionService {
             MapGraph.Coordinates centerOfMap,
             BigDecimal scale
     ) {
-        BigDecimal deltaLongitude = coordinates.longitudeInRadians().subtract(centerOfMap.longitudeInRadians());
+        BigDecimal longitudeInRadians = coordinates.longitudeInDecimal().multiply(ONE_DEGREE_IN_RADIANS);
+        BigDecimal centerLongitudeInRadians = centerOfMap.longitudeInDecimal().multiply(ONE_DEGREE_IN_RADIANS);
+        BigDecimal deltaLongitude = longitudeInRadians.subtract(centerLongitudeInRadians);
         BigDecimal x = RADIUS_OF_GLOBE_IN_KM.add(deltaLongitude).multiply(scale);
 
-        BigDecimal deltaLatitude = coordinates.latitudeInRadians().subtract(centerOfMap.latitudeInRadians());
+        BigDecimal latitudeInRadians = coordinates.latitudeInDecimal().multiply(ONE_DEGREE_IN_RADIANS);
+        BigDecimal centerLatitudeInRadians = centerOfMap.latitudeInDecimal().multiply(ONE_DEGREE_IN_RADIANS);
+        BigDecimal deltaLatitude = latitudeInRadians.subtract(centerLatitudeInRadians);
         BigDecimal y = RADIUS_OF_GLOBE_IN_KM.multiply(deltaLatitude);
 
         return EuclideanGraph.Node.builder()
