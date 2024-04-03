@@ -37,6 +37,7 @@ public class GradeService {
     private final EuclideanGraphService euclideanGraphService;
     private final GraphPackageRepository graphPackageRepository;
     private final SolutionRepository solutionRepository;
+    private final GraphService graphService;
     private final Clock clock;
 
     public String generateGradeRequestForPackage(
@@ -60,7 +61,8 @@ public class GradeService {
                         .build())
                 .toList();
         Map<String, EuclideanGraph> graphMap = getGraphIdToGraphMap(graphPackage.graphIds());
-        graphGrades.forEach(graphGrade -> saveWaitingGradeInDb(graphGrade.gradeId, graphGrade.graphId, solutionId, packageGradeRequestDto.problem(), graphMap));
+        Map<String, GraphType> graphTypeMap = graphService.getGraphTypes(graphPackage.graphIds());
+        graphGrades.forEach(graphGrade -> saveWaitingGradeInDb(graphGrade.gradeId, graphGrade.graphId, solutionId, packageGradeRequestDto.problem(), graphMap, graphTypeMap));
         gradeRequestProducer.generateGradeRequest(
                 GradeRequest.builder()
                         .requests(
@@ -87,7 +89,7 @@ public class GradeService {
         }
 
         Either<String, Object> verificationResult =
-                euclideanGraphService.getGraph(grade.graphId())
+                euclideanGraphService.getGraphById(grade.graphId())
                         .<Either<String, EuclideanGraph>>map(Either::right)
                         .orElse(Either.left("no such graph in the db"))
                         .flatMap(graph -> verificationService.verify(graph, grade.problem(), runResult.output()));
@@ -132,7 +134,13 @@ public class GradeService {
                 .orElseThrow(RuntimeException::new);
     }
 
-    private void saveWaitingGradeInDb(String gradeId, String graphId, String solutionId, Problem problem, Map<String, EuclideanGraph> graphMap) {
+    private void saveWaitingGradeInDb(
+            String gradeId,
+            String graphId,
+            String solutionId,
+            Problem problem,
+            Map<String, EuclideanGraph> graphMap,
+            Map<String, GraphType> graphTypeMap) {
         gradeRepository.save(
                 Grade.builder()
                         .gradeId(gradeId)
@@ -141,12 +149,13 @@ public class GradeService {
                         .solutionId(solutionId)
                         .problem(problem)
                         .status(Status.WAITING)
+                        .graphType(graphTypeMap.get(graphId))
                         .build()
         );
     }
 
     private Map<String, EuclideanGraph> getGraphIdToGraphMap(List<String> graphIds) {
-        return euclideanGraphService.getGraphs(graphIds)
+        return euclideanGraphService.getGraphsByIdIn(graphIds)
                 .stream()
                 .collect(Collectors.toMap(EuclideanGraph::id, Function.identity()));
     }
