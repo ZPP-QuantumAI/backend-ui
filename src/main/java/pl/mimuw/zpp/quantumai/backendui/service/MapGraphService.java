@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.mimuw.zpp.quantumai.backendui.controller.dto.MapGraphCreationRequestDto;
 import pl.mimuw.zpp.quantumai.backendui.model.EuclideanGraph;
+import pl.mimuw.zpp.quantumai.backendui.model.Graph;
 import pl.mimuw.zpp.quantumai.backendui.model.GraphType;
 import pl.mimuw.zpp.quantumai.backendui.model.MapGraph;
+import pl.mimuw.zpp.quantumai.backendui.repository.GraphRepository;
 import pl.mimuw.zpp.quantumai.backendui.repository.MapGraphRepository;
 import pl.mimuw.zpp.quantumai.backendui.utils.RandomNameGenerator;
 
@@ -19,7 +21,7 @@ public class MapGraphService {
     private final MapGraphConversionService mapGraphConversionService;
     private final RandomNameGenerator randomNameGenerator;
     private final EuclideanGraphService euclideanGraphService;
-    private final GraphService graphService;
+    private final GraphRepository graphRepository;
 
     public String createGraph(MapGraphCreationRequestDto request) {
         String id = randomNameGenerator.generateName();
@@ -44,7 +46,12 @@ public class MapGraphService {
 
         mapGraphRepository.save(mapGraphWithCenter);
         euclideanGraphService.saveGraphWithId(euclideanGraph);
-        graphService.createGraph(id, GraphType.MAP);
+        graphRepository.save(
+                Graph.builder()
+                        .graphId(id)
+                        .graphType(GraphType.MAP)
+                        .build()
+        );
 
         return id;
     }
