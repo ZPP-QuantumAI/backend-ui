@@ -70,7 +70,7 @@ public class MapGraphConversionService {
         BigDecimal longitudeInRadians = coordinates.longitudeInDecimal().multiply(ONE_DEGREE_IN_RADIANS);
         BigDecimal centerLongitudeInRadians = centerOfMap.longitudeInDecimal().multiply(ONE_DEGREE_IN_RADIANS);
         BigDecimal deltaLongitude = longitudeInRadians.subtract(centerLongitudeInRadians);
-        BigDecimal x = RADIUS_OF_GLOBE_IN_KM.add(deltaLongitude).multiply(scale);
+        BigDecimal x = RADIUS_OF_GLOBE_IN_KM.multiply(deltaLongitude).multiply(scale);
 
         BigDecimal latitudeInRadians = coordinates.latitudeInDecimal().multiply(ONE_DEGREE_IN_RADIANS);
         BigDecimal centerLatitudeInRadians = centerOfMap.latitudeInDecimal().multiply(ONE_DEGREE_IN_RADIANS);

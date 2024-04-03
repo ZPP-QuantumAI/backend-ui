@@ -26,10 +26,6 @@ WORKDIR /app
 # Copy the built JAR file from the builder stage
 COPY --from=builder /app/build/libs/backend-ui*.jar ./your-app.jar
 
-RUN apt update && \
-    apt install --yes --assume-yes python3 && \
-    apt install --yes --assume-yes unzip
-
 EXPOSE 8080
 
 # Set the command to run the application
