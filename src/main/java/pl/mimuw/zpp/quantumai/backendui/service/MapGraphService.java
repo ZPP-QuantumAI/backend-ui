@@ -57,10 +57,6 @@ public class MapGraphService {
         return id;
     }
 
-    public List<MapGraph> getAllGraphs() {
-        return mapGraphRepository.findAll();
-    }
-
     public List<MapGraph> getAllGraphs(List<String> graphIds) { return mapGraphRepository.findAllById(graphIds); }
 
     public Optional<MapGraph> getGraphById(String graphId) {
