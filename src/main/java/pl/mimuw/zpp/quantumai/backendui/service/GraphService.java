@@ -12,6 +12,7 @@ import pl.mimuw.zpp.quantumai.backendui.repository.GraphRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,16 +23,11 @@ public class GraphService {
     private final MapGraphService mapGraphService;
     private final EuclideanGraphService euclideanGraphService;
 
-    public void createGraph(String graphId, GraphType graphType) {
-        graphRepository.save(
-                Graph.builder()
-                        .graphId(graphId)
-                        .graphType(graphType)
-                        .build()
-        );
-    }
     public List<GraphDto> getAllGraphs() {
         List<Graph> graphs = graphRepository.findAll();
+
+        Map<String, Graph> graphMap = graphs.stream()
+                .collect(Collectors.toMap(Graph::graphId, Function.identity()));
 
         List<String> euclideanGraphIds = graphs.stream()
                 .filter(graph -> graph.graphType().equals(GraphType.EUCLIDEAN))
@@ -52,6 +48,7 @@ public class GraphService {
                         GraphDto.builder()
                                 .graphType(GraphType.EUCLIDEAN)
                                 .graph(euclideanGraph)
+                                .deleted(graphMap.get(euclideanGraph.id()).deleted())
                                 .build());
 
         Stream<GraphDto> mapGraphDtos = mapGraphs.stream()
@@ -59,17 +56,22 @@ public class GraphService {
                         GraphDto.builder()
                                 .graphType(GraphType.MAP)
                                 .graph(mapGraph)
+                                .deleted(graphMap.get(mapGraph.id()).deleted())
                                 .build());
 
         return Stream.concat(mapGraphDtos, euclideanGraphDtos).toList();
     }
 
     public Optional<GraphDto> getGraphById(String graphId) {
+        Map<String, Graph> graphMap = graphRepository.findAll().stream()
+                .collect(Collectors.toMap(Graph::graphId, Function.identity()));
+
         Optional<GraphDto> mapGraphDto = mapGraphService.getGraphById(graphId)
                 .map(mapGraph ->
                         GraphDto.builder()
                                 .graphType(GraphType.MAP)
                                 .graph(mapGraph)
+                                .deleted(graphMap.get(mapGraph.id()).deleted())
                                 .build());
 
         if (mapGraphDto.isPresent()) {
@@ -81,11 +83,18 @@ public class GraphService {
                         GraphDto.builder()
                                 .graphType(GraphType.EUCLIDEAN)
                                 .graph(euclideanGraph)
+                                .deleted(graphMap.get(euclideanGraph.id()).deleted())
                                 .build());
     }
 
     public Map<String, GraphType> getGraphTypes(List<String> graphIds) {
         return graphRepository.findAllById(graphIds).stream()
                 .collect(Collectors.toMap(Graph::graphId, Graph::graphType));
+    }
+
+    public void deleteGraph(String graphId) {
+        graphRepository.findById(graphId).ifPresent(
+                graph -> graphRepository.save(graph.withDeleted(true))
+        );
     }
 }

@@ -50,6 +50,7 @@ public class MapGraphService {
                 Graph.builder()
                         .graphId(id)
                         .graphType(GraphType.MAP)
+                        .deleted(false)
                         .build()
         );
 

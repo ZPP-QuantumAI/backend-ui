@@ -34,6 +34,12 @@ public class GraphController {
         );
     }
 
+    @DeleteMapping("/")
+    public ResponseEntity<Void> deleteGraph(@RequestParam String graphId) {
+        graphService.deleteGraph(graphId);
+        return ResponseEntity.ok(null);
+    }
+
     @Deprecated
     @GetMapping("/all")
     public ResponseEntity<List<EuclideanGraph>> getGraphs() {

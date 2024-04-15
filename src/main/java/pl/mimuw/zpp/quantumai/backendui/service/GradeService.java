@@ -49,9 +49,9 @@ public class GradeService {
         solutionRepository.save(
                 Solution.builder()
                         .solutionId(solutionId)
-                        .solutionType(Solution.SolutionType.PACKAGE)
                         .resourceId(packageGradeRequestDto.packageId())
                         .name(packageGradeRequestDto.name())
+                        .problem(packageGradeRequestDto.problem())
                         .build()
         );
         List<GraphGrade> graphGrades = graphPackage.graphIds().stream()

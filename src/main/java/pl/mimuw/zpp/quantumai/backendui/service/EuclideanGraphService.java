@@ -26,6 +26,7 @@ public class EuclideanGraphService {
                 Graph.builder()
                         .graphId(id)
                         .graphType(GraphType.EUCLIDEAN)
+                        .deleted(false)
                         .build()
         );
         return id;

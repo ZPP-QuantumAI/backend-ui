@@ -6,11 +6,8 @@ import org.springframework.data.annotation.Id;
 @Builder
 public record Solution(
         @Id String solutionId,
-        SolutionType solutionType,
         String resourceId,
-        String name
+        String name,
+        Problem problem
 ) {
-    public enum SolutionType {
-        PACKAGE
-    }
 }
