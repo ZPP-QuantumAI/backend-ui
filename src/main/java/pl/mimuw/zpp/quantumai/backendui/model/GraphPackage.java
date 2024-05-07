@@ -12,6 +12,7 @@ public record GraphPackage(
         @Id String packageId,
         String name,
         String description,
-        List<String> graphIds
+        List<String> graphIds,
+        Boolean isDeleted
 ) {
 }

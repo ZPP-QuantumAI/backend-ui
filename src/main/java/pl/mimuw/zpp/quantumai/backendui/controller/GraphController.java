@@ -63,4 +63,11 @@ public class GraphController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/")
+    public ResponseEntity<Boolean> deleteGraph(@RequestParam String graphId) {
+        return ResponseEntity.ok(
+                graphService.deleteGraph(graphId)
+        );
+    }
 }

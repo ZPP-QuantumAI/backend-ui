@@ -38,4 +38,13 @@ public class PackageController {
                 packageService.getGraphPackage(packageId).orElseThrow(() -> new PackageNotFoundException(packageId))
         );
     }
+
+    @DeleteMapping("/")
+    public ResponseEntity<Boolean> deletePackage(
+            @RequestParam String packageId
+    ) {
+        return ResponseEntity.ok(
+                packageService.deletePackage(packageId)
+        );
+    }
 }
