@@ -42,7 +42,7 @@ public class BackendUiApplication {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedOrigins("*"); // Later we can specify allowed origins.
+				registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE");; // Later we can specify allowed origins.
 			}
 		};
 	}
