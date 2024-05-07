@@ -17,7 +17,7 @@ public class PackageService {
 
     public String createPackage(GraphPackage graphPackage) {
         String id = randomNameGenerator.generateName();
-        graphPackageRepository.save(graphPackage.withPackageId(id));
+        graphPackageRepository.save(graphPackage.withPackageId(id).withIsDeleted(false));
         return id;
     }
 
