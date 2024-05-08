@@ -17,15 +17,26 @@ public class PackageService {
 
     public String createPackage(GraphPackage graphPackage) {
         String id = randomNameGenerator.generateName();
-        graphPackageRepository.save(graphPackage.withPackageId(id));
+        graphPackageRepository.save(graphPackage.withPackageId(id).withIsDeleted(false));
         return id;
     }
 
     public List<GraphPackage> getPackages() {
-        return graphPackageRepository.findAll();
+        return graphPackageRepository.findAll().stream()
+                .filter(graphPackage -> !graphPackage.isDeleted())
+                .toList();
     }
 
     public Optional<GraphPackage> getGraphPackage(String packageId) {
         return graphPackageRepository.findById(packageId);
+    }
+
+    public boolean deletePackage(String packageId) {
+        Optional<GraphPackage> graphPackage = graphPackageRepository.findById(packageId);
+        if (graphPackage.isPresent()) {
+            graphPackageRepository.save(graphPackage.get().withIsDeleted(true));
+            return true;
+        }
+        return false;
     }
 }

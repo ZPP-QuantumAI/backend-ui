@@ -27,6 +27,7 @@ public class GraphService {
                 Graph.builder()
                         .graphId(graphId)
                         .graphType(graphType)
+                        .isDeleted(false)
                         .build()
         );
     }
@@ -34,12 +35,14 @@ public class GraphService {
         List<Graph> graphs = graphRepository.findAll();
 
         List<String> euclideanGraphIds = graphs.stream()
-                .filter(graph -> graph.graphType().equals(GraphType.EUCLIDEAN))
+                .filter(graph -> graph.graphType().equals(GraphType.EUCLIDEAN)
+                        && !graph.isDeleted())
                 .map(Graph::graphId)
                 .toList();
 
         List<String> mapGraphIds = graphs.stream()
-                .filter(graph -> graph.graphType().equals(GraphType.MAP))
+                .filter(graph -> graph.graphType().equals(GraphType.MAP)
+                        && !graph.isDeleted())
                 .map(Graph::graphId)
                 .toList();
 
@@ -87,5 +90,14 @@ public class GraphService {
     public Map<String, GraphType> getGraphTypes(List<String> graphIds) {
         return graphRepository.findAllById(graphIds).stream()
                 .collect(Collectors.toMap(Graph::graphId, Graph::graphType));
+    }
+
+    public boolean deleteGraph(String graphId) {
+        Optional<Graph> graph = graphRepository.findById(graphId);
+        if (graph.isEmpty()) {
+            return false;
+        }
+        graphRepository.save(graph.get().withIsDeleted(true));
+        return true;
     }
 }
