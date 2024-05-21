@@ -15,6 +15,6 @@ public class MongoStorage implements Storage {
     private final GridFsTemplate gridFsTemplate;
     @Override
     public String save(MultipartFile multipartFile) throws IOException {
-        return gridFsTemplate.store(multipartFile.getInputStream(), null, "application/zip").toString();
+        return gridFsTemplate.store(multipartFile.getInputStream(), "null", "application/zip").toString();
     }
 }
