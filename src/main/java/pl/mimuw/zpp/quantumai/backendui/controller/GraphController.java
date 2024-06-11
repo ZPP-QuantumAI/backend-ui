@@ -34,13 +34,13 @@ public class GraphController {
         );
     }
 
-    @Deprecated
-    @GetMapping("/all")
-    public ResponseEntity<List<EuclideanGraph>> getGraphs() {
-        return ResponseEntity.ok(
-                euclideanGraphService.getAllGraphs()
-        );
-    }
+//    @Deprecated
+//    @GetMapping("/all")
+//    public ResponseEntity<List<EuclideanGraph>> getGraphs() {
+//        return ResponseEntity.ok(
+//                euclideanGraphService.getAllGraphs()
+//        );
+//    }
 
     @GetMapping("/all/new")
     public ResponseEntity<List<GraphDto>> getGraphsOld() {
