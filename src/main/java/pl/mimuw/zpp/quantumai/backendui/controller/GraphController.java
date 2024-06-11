@@ -49,13 +49,13 @@ public class GraphController {
         );
     }
 
-    @Deprecated
-    @GetMapping("/")
-    public ResponseEntity<EuclideanGraph> getGraphOld(@RequestParam String graphId) {
-        return euclideanGraphService.getGraphById(graphId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @Deprecated
+//    @GetMapping("/")
+//    public ResponseEntity<EuclideanGraph> getGraphOld(@RequestParam String graphId) {
+//        return euclideanGraphService.getGraphById(graphId)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
     @GetMapping("/new")
     public ResponseEntity<GraphDto> getGraph(@RequestParam String graphId) {
